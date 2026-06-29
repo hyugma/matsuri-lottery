@@ -34,113 +34,32 @@ let state = {
     soundEnabled: true
 };
 
-// Sound effects using Web Audio API
-let audioCtx = null;
-let drumRollNode = null;
+// Sound effects using Audio objects
+let drumRollAudio = new Audio('./assets/1.mp3');
+drumRollAudio.loop = true;
+let tadaAudio = new Audio('./assets/2.mp3');
 
 function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-    }
+    // Mobile Safari may require user interaction to load/play audio
+    drumRollAudio.load();
+    tadaAudio.load();
 }
 
 function playDrumRoll() {
     if (!state.soundEnabled) return;
-    initAudio();
-    
-    // Drum roll noise
-    const bufferSize = audioCtx.sampleRate * 2;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-    }
-    
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    noise.loop = true;
-    
-    // Snare-like filter
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = 1000;
-    
-    // Gain modulation for drum roll effect
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.5;
-    
-    const lfo = audioCtx.createOscillator();
-    lfo.type = 'square';
-    lfo.frequency.value = 15; // 15 hits per second
-    
-    const lfoGain = audioCtx.createGain();
-    lfoGain.gain.value = 0.5;
-    
-    lfo.connect(lfoGain);
-    lfoGain.connect(gainNode.gain);
-    lfo.start();
-    
-    noise.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    
-    noise.start();
-    
-    drumRollNode = {
-        noise: noise,
-        lfo: lfo,
-        gainNode: gainNode
-    };
+    drumRollAudio.currentTime = 0;
+    drumRollAudio.play().catch(e => console.log('Audio play failed', e));
 }
 
 function stopDrumRoll() {
-    if (drumRollNode) {
-        // Fade out
-        drumRollNode.gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
-        setTimeout(() => {
-            if (drumRollNode) {
-                drumRollNode.noise.stop();
-                drumRollNode.lfo.stop();
-                drumRollNode = null;
-            }
-        }, 200);
-    }
+    drumRollAudio.pause();
 }
 
 function playTaDa() {
     if (!state.soundEnabled) return;
-    initAudio();
-    
-    const playChord = (frequencies, startTime, duration, type = 'triangle') => {
-        frequencies.forEach(freq => {
-            const osc = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            osc.type = type;
-            osc.frequency.value = freq;
-            
-            // Envelope
-            gainNode.gain.setValueAtTime(0, startTime);
-            gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
-            
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            osc.start(startTime);
-            osc.stop(startTime + duration);
-        });
-    };
-    
-    const now = audioCtx.currentTime;
-    // "Ta-"
-    playChord([523.25, 659.25, 783.99], now, 0.15, 'triangle'); // C5 E5 G5
-    // "-da!"
-    playChord([523.25, 659.25, 783.99, 1046.50], now + 0.2, 1.5, 'triangle'); // C5 E5 G5 C6
-};
+    tadaAudio.currentTime = 0;
+    tadaAudio.play().catch(e => console.log('Audio play failed', e));
+}
 
 // Animation variables
 let animationFrameId = null;
