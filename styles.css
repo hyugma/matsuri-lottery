@@ -497,3 +497,69 @@ input[type="number"]:focus {
     box-shadow: 0 0 10px white, 0 0 20px var(--primary-color);
     opacity: 0;
 }
+
+/* Mobile Layout Responsive Adjustments */
+@media (max-width: 768px), (max-height: 600px) {
+    body {
+        height: 100dvh;
+    }
+    
+    .app-container {
+        flex-direction: column;
+        height: 100dvh;
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+    
+    .sidebar {
+        width: 100%;
+        max-height: 45%;
+    }
+    
+    .settings-panel {
+        max-height: none;
+        top: 0.5rem;
+        left: 0.5rem;
+        width: calc(100vw - 1rem);
+        height: calc(100dvh - 1rem);
+    }
+    
+    .main-stage {
+        flex-grow: 1;
+        border-radius: 1rem;
+    }
+    
+    .glass-panel {
+        padding: 1rem;
+    }
+    
+    .stage-header {
+        padding: 1rem;
+    }
+    
+    .stage-header h1 {
+        font-size: 2rem;
+    }
+    
+    .winner-number {
+        font-size: 45vw;
+    }
+    
+    .controls {
+        padding: 1rem;
+    }
+    
+    .btn.massive {
+        font-size: 1.5rem;
+        padding: 1rem 3rem;
+    }
+    
+    .history-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .history-item {
+        font-size: 1.1rem;
+        padding: 0.5rem 0.75rem;
+    }
+}
