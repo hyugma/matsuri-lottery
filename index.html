@@ -43,7 +43,7 @@
             <div class="input-group">
                 <label for="total-participants">参加人数</label>
                 <div class="exclude-controls">
-                    <input type="number" id="total-participants" min="1" value="100">
+                    <input type="number" id="total-participants" min="1" value="100" inputmode="numeric" pattern="\d*">
                     <button id="btn-update-participants" class="btn secondary">更新</button>
                 </div>
             </div>
@@ -51,7 +51,7 @@
             <div class="input-group">
                 <label for="exclude-number">途中退出者 (除外番号)</label>
                 <div class="exclude-controls">
-                    <input type="text" id="exclude-number" placeholder="例: 1, 2, 5-10">
+                    <input type="text" id="exclude-number" placeholder="例: 1, 2, 5-10" inputmode="email">
                     <button id="btn-add-exclude" class="btn secondary">追加</button>
                 </div>
                 <div id="excluded-list" class="tag-list"></div>

@@ -166,7 +166,10 @@ function getAvailableNumbers() {
 
 // Actions
 function updateParticipants() {
-    const val = parseInt(elTotalParticipants.value, 10);
+    let valStr = elTotalParticipants.value.trim();
+    // 全角数字を半角に変換
+    valStr = valStr.replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
+    const val = parseInt(valStr, 10);
     if (val > 0) {
         state.totalParticipants = val;
         saveState();
@@ -183,8 +186,11 @@ function addExclude() {
     const inputVal = elExcludeNumber.value.trim();
     if (!inputVal) return;
 
-    // 全角カンマやハイフンを半角に変換しつつ分割
-    const normalizedInput = inputVal.replace(/，/g, ',').replace(/ー|−/g, '-');
+    // 全角数字、カンマ、ハイフンを半角に変換
+    const normalizedInput = inputVal
+        .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0))
+        .replace(/，|、/g, ',')
+        .replace(/ー|−|—/g, '-');
     const parts = normalizedInput.split(',').map(s => s.trim());
     const newExcludes = [];
     let hasError = false;
