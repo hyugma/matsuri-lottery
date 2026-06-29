@@ -27,16 +27,18 @@
             
             <div class="settings-content" id="settings-content">
             
-            <div class="input-group">
-                <label for="app-title-input">タイトル表示</label>
-                <input type="text" id="app-title-input" value=" ">
-            </div>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <div class="input-group" style="flex: 2; min-width: 200px;">
+                    <label for="app-title-input">タイトル表示</label>
+                    <input type="text" id="app-title-input" value=" ">
+                </div>
 
-            <div class="input-group">
-                <label for="theme-color-input">テーマカラー</label>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                    <input type="color" id="theme-color-input" value="#8b5cf6" style="width: 50px; height: 40px; border: none; border-radius: 0.5rem; background: transparent; cursor: pointer;">
-                    <span style="font-size: 0.8rem; color: var(--text-secondary);">色を選択して全体の色味を変更</span>
+                <div class="input-group" style="flex: 1; min-width: 200px;">
+                    <label for="theme-color-input">テーマカラー</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="color" id="theme-color-input" value="#8b5cf6" style="width: 50px; height: 40px; border: none; border-radius: 0.5rem; background: transparent; cursor: pointer;">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">色を選択</span>
+                    </div>
                 </div>
             </div>
 
