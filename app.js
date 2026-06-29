@@ -36,7 +36,6 @@ let state = {
 
 // Sound effects using Audio objects
 let drumRollAudio = new Audio('./assets/1.mp3');
-drumRollAudio.loop = true;
 let tadaAudio = new Audio('./assets/2.mp3');
 
 function initAudio() {
