@@ -15,6 +15,7 @@ const elHistoryList = document.getElementById('history-list');
 const elSettingsPanel = document.getElementById('settings-panel');
 const elBtnToggleSettings = document.getElementById('btn-toggle-settings');
 const elBtnCloseSettings = document.getElementById('btn-close-settings');
+const elSoundToggle = document.getElementById('sound-toggle');
 const elAppTitleInput = document.getElementById('app-title-input');
 const elThemeColorInput = document.getElementById('theme-color-input');
 const elAppTitleDisplay = document.getElementById('app-title-display');
@@ -29,7 +30,116 @@ let state = {
     drawnHistory: [],
     prizesGiven: [],
     appTitle: ' ',
-    themeColor: '#8b5cf6'
+    themeColor: '#8b5cf6',
+    soundEnabled: true
+};
+
+// Sound effects using Web Audio API
+let audioCtx = null;
+let drumRollNode = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function playDrumRoll() {
+    if (!state.soundEnabled) return;
+    initAudio();
+    
+    // Drum roll noise
+    const bufferSize = audioCtx.sampleRate * 2;
+    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+    }
+    
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buffer;
+    noise.loop = true;
+    
+    // Snare-like filter
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1000;
+    
+    // Gain modulation for drum roll effect
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.5;
+    
+    const lfo = audioCtx.createOscillator();
+    lfo.type = 'square';
+    lfo.frequency.value = 15; // 15 hits per second
+    
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 0.5;
+    
+    lfo.connect(lfoGain);
+    lfoGain.connect(gainNode.gain);
+    lfo.start();
+    
+    noise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    
+    noise.start();
+    
+    drumRollNode = {
+        noise: noise,
+        lfo: lfo,
+        gainNode: gainNode
+    };
+}
+
+function stopDrumRoll() {
+    if (drumRollNode) {
+        // Fade out
+        drumRollNode.gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+        setTimeout(() => {
+            if (drumRollNode) {
+                drumRollNode.noise.stop();
+                drumRollNode.lfo.stop();
+                drumRollNode = null;
+            }
+        }, 200);
+    }
+}
+
+function playTaDa() {
+    if (!state.soundEnabled) return;
+    initAudio();
+    
+    const playChord = (frequencies, startTime, duration, type = 'triangle') => {
+        frequencies.forEach(freq => {
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = type;
+            osc.frequency.value = freq;
+            
+            // Envelope
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.05);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        });
+    };
+    
+    const now = audioCtx.currentTime;
+    // "Ta-"
+    playChord([523.25, 659.25, 783.99], now, 0.15, 'triangle'); // C5 E5 G5
+    // "-da!"
+    playChord([523.25, 659.25, 783.99, 1046.50], now + 0.2, 1.5, 'triangle'); // C5 E5 G5 C6
 };
 
 // Animation variables
@@ -87,6 +197,7 @@ function updateUI() {
     elTotalParticipants.value = state.totalParticipants;
     if (elAppTitleInput) elAppTitleInput.value = state.appTitle || ' ';
     if (elThemeColorInput) elThemeColorInput.value = state.themeColor || '#8b5cf6';
+    if (elSoundToggle) elSoundToggle.checked = state.soundEnabled !== false;
     if (elAppTitleDisplay) elAppTitleDisplay.textContent = state.appTitle || ' ';
     applyThemeColor(state.themeColor || '#8b5cf6');
     
@@ -257,7 +368,8 @@ function resetAll() {
             drawnHistory: [],
             prizesGiven: [],
             appTitle: state.appTitle, // タイトルは保持する方が親切
-            themeColor: state.themeColor // テーマカラーも保持
+            themeColor: state.themeColor, // テーマカラーも保持
+            soundEnabled: state.soundEnabled !== false
         };
         saveState();
         elWinnerDisplay.classList.add('hidden');
@@ -309,6 +421,8 @@ function exportData() {
 function startLottery() {
     const pool = getAvailableNumbers();
     if (pool.length === 0) return;
+
+    playDrumRoll();
 
     // ゲーム中は設定パネルを最小化する
     if (!elSettingsPanel.classList.contains('collapsed')) {
@@ -402,6 +516,8 @@ function stopLottery() {
         animationFrameId = null;
     }
     
+    stopDrumRoll();
+    
     // Converge / fade out floating elements
     floatingElements.forEach(item => {
         item.el.classList.add('stopping');
@@ -416,6 +532,8 @@ function stopLottery() {
         
         elWinnerNumber.textContent = winner;
         elWinnerDisplay.classList.remove('hidden');
+        
+        playTaDa();
         
         // Create particles
         createParticles();
@@ -500,6 +618,14 @@ function setupEventListeners() {
         elBtnCloseSettings.addEventListener('click', toggleSettings);
     }
     
+    if (elSoundToggle) {
+        elSoundToggle.addEventListener('change', (e) => {
+            state.soundEnabled = e.target.checked;
+            saveState();
+            if (state.soundEnabled) initAudio();
+        });
+    }
+
     if (elAppTitleInput) {
         elAppTitleInput.addEventListener('input', (e) => {
             elAppTitleDisplay.textContent = e.target.value;
