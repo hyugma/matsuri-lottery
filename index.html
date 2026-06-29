@@ -48,11 +48,6 @@
                 <div id="excluded-list" class="tag-list"></div>
             </div>
 
-            <div class="input-group">
-                <label>表示設定</label>
-                <button id="btn-fullscreen" class="btn secondary">フルスクリーン表示の切り替え</button>
-            </div>
-
             <div class="danger-zone" style="display: flex; gap: 1rem;">
                 <button id="btn-export" class="btn secondary" style="flex: 1;">証跡を出力 (txt)</button>
                 <button id="btn-reset" class="btn danger" style="flex: 1;">全てリセット</button>
@@ -88,7 +83,10 @@
         <aside class="sidebar glass-panel history-panel">
             <div class="history-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <h2 style="margin-bottom: 0;">🏆 当選履歴</h2>
-                <button id="btn-toggle-settings" class="btn-icon" style="background: transparent; border: none; font-size: 1.5rem; width: auto; height: auto;" title="設定を開く">⚙️</button>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btn-fullscreen" class="btn-icon" style="background: transparent; border: none; font-size: 1.5rem; width: auto; height: auto;" title="フルスクリーン切り替え">🔲</button>
+                    <button id="btn-toggle-settings" class="btn-icon" style="background: transparent; border: none; font-size: 1.5rem; width: auto; height: auto;" title="設定を開く">⚙️</button>
+                </div>
             </div>
             <div class="search-box" style="margin-bottom: 1rem;">
                 <input type="number" id="search-history" placeholder="🔍 番号で検索..." style="width: 100%; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
