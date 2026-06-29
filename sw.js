@@ -1,10 +1,11 @@
-const CACHE_NAME = 'matsuri-lottery-v1';
+const CACHE_NAME = 'matsuri-lottery-v2';
 const urlsToCache = [
   './',
   './index.html',
-  './styles.css?v=4',
+  './styles.css?v=5',
   './app.js?v=2',
-  './manifest.json'
+  './manifest.json',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', event => {
