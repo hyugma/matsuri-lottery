@@ -20,6 +20,7 @@ const elThemeColorInput = document.getElementById('theme-color-input');
 const elAppTitleDisplay = document.getElementById('app-title-display');
 const elSearchHistory = document.getElementById('search-history');
 const elBtnExport = document.getElementById('btn-export');
+const elBtnFullscreen = document.getElementById('btn-fullscreen');
 
 // State
 let state = {
@@ -452,12 +453,25 @@ function toggleSettings() {
     }, 300);
 }
 
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
 // Event Listeners
 function setupEventListeners() {
     elBtnUpdateParticipants.addEventListener('click', updateParticipants);
     elBtnAddExclude.addEventListener('click', addExclude);
     elBtnReset.addEventListener('click', resetAll);
     if (elBtnExport) elBtnExport.addEventListener('click', exportData);
+    if (elBtnFullscreen) elBtnFullscreen.addEventListener('click', toggleFullScreen);
     elBtnStart.addEventListener('click', startLottery);
     elBtnStop.addEventListener('click', stopLottery);
     elBtnToggleSettings.addEventListener('click', toggleSettings);
