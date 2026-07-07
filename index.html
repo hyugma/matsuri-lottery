@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matsuri Lottery</title>
+
+    <!-- PWA / Fullscreen settings for iOS/Android -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Lottery">
+    <meta name="mobile-web-app-capable" content="yes">
+    <!-- Safari用アイコン -->
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="stylesheet" href="styles.css?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <!-- GA_TRACKING_BLOCK_START -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=__GA_TRACKING_ID__"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', '__GA_TRACKING_ID__');
+    </script>
+    <!-- GA_TRACKING_BLOCK_END -->
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Settings Sidebar -->
+        <aside class="sidebar glass-panel settings-panel collapsed" id="settings-panel">
+            <div class="settings-header">
+                <h2 class="settings-title">⚙️ 設定</h2>
+                <button id="btn-close-settings" class="btn-icon" title="設定を閉じる">×</button>
+            </div>
+
+            <div class="settings-content" id="settings-content">
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="input-group" style="flex: 2; min-width: 200px;">
+                        <label for="app-title-input">タイトル表示</label>
+                        <input type="text" id="app-title-input" value=" ">
+                    </div>
+
+                    <div class="input-group" style="flex: 1; min-width: 200px;">
+                        <label for="theme-color-input">テーマカラー</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="color" id="theme-color-input" value="#8b5cf6"
+                                style="width: 50px; height: 40px; border: none; border-radius: 0.5rem; background: transparent; cursor: pointer;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">色を選択</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="flex: 1; min-width: 150px;">
+                        <label for="sound-toggle">効果音</label>
+                        <div style="display: flex; gap: 0.5rem; align-items: center; height: 40px;">
+                            <input type="checkbox" id="sound-toggle" checked
+                                style="width: 24px; height: 24px; cursor: pointer;">
+                            <span style="font-size: 0.8rem; color: var(--text-secondary);">ON/OFF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="input-group" style="flex: 1; min-width: 200px;">
+                        <label for="total-participants">参加人数</label>
+                        <div class="exclude-controls">
+                            <input type="number" id="total-participants" min="1" value="100" inputmode="numeric"
+                                pattern="\d*">
+                            <button id="btn-update-participants" class="btn secondary">更新</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="flex: 2; min-width: 200px;">
+                        <label for="exclude-number">除外番号</label>
+                        <div class="exclude-controls">
+                            <input type="text" id="exclude-number" placeholder="例: 1, 2, 5-10" inputmode="email">
+                            <button id="btn-add-exclude" class="btn secondary">追加</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="excluded-list" class="tag-list" style="margin-bottom: 1rem;"></div>
+
+                <div class="danger-zone" style="display: flex; gap: 1rem;">
+                    <button id="btn-export" class="btn secondary" style="flex: 1;">証跡を出力 (txt)</button>
+                    <button id="btn-reset" class="btn danger" style="flex: 1;">全てリセット</button>
+                </div>
+
+                <div class="stats-box">
+                    <p>残り候補: <span id="stat-remaining" class="highlight-text">0</span> 人</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Stage -->
+        <main class="main-stage">
+            <header class="stage-header">
+                <h1 id="app-title-display"> </h1>
+            </header>
+
+            <div class="lottery-arena" id="lottery-arena">
+                <!-- Numbers will be injected here -->
+                <div class="winner-display hidden" id="winner-display">
+                    <div class="winner-label">WINNER</div>
+                    <div class="winner-number" id="winner-number">--</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="btn-start" class="btn primary massive">START</button>
+                <button id="btn-stop" class="btn warning massive hidden">STOP</button>
+            </div>
+        </main>
+
+        <!-- History Sidebar -->
+        <aside class="sidebar glass-panel history-panel">
+            <div class="history-header"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h2 style="margin-bottom: 0;">🏆 当選履歴</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btn-fullscreen" class="btn-icon"
+                        style="background: transparent; border: none; font-size: 1.5rem; width: auto; height: auto;"
+                        title="フルスクリーン切り替え">🔲</button>
+                    <button id="btn-toggle-settings" class="btn-icon"
+                        style="background: transparent; border: none; font-size: 1.5rem; width: auto; height: auto;"
+                        title="設定を開く">⚙️</button>
+                </div>
+            </div>
+            <div class="search-box" style="margin-bottom: 1rem;">
+                <input type="number" id="search-history" placeholder="🔍 番号で検索..."
+                    style="width: 100%; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); color: white;">
+            </div>
+            <div class="history-list-container">
+                <ol id="history-list" class="history-list">
+                    <!-- History items will be injected here -->
+                </ol>
+            </div>
+        </aside>
+    </div>
+
+    <script src="app.js?v=2"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>
